@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Central de Ajuda DEEP – Base de conhecimento organizada por categorias.">
+    <title>Central de Ajuda DEEP</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <style>
+        /* Estilos dos Controles do Administrador */
+        .admin-controls {
+            text-align: center;
+            padding: 30px 20px;
+            border-top: 1px solid var(--border);
+            margin-top: 40px;
+        }
+        .btn-admin {
+            padding: 12px 24px;
+            border: none;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+        .btn-acessos {
+            background-color: #10b981;
+            color: white;
+            margin-right: 15px;
+        }
+        .btn-acessos:hover { background-color: #059669; transform: translateY(-2px); }
+        .btn-toggle-admin {
+            background-color: #4b5563;
+            color: white;
+        }
+        .btn-toggle-admin:hover { background-color: #374151; transform: translateY(-2px); }
+        .btn-toggle-admin.logado { background-color: #ef4444; }
+        .btn-toggle-admin.logado:hover { background-color: #dc2626; }
+
+        /* Estilos dos Modais Profissionais (Integrados ao Tema Escuro da Página) */
+        .modal-pro-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(8px);
+            z-index: 10000;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .modal-pro-overlay.active {
+            display: flex;
+            opacity: 1;
+        }
+        .modal-pro-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            padding: 30px;
+            border-radius: var(--radius-xl);
+            width: 90%;
+            max-width: 400px;
+            box-shadow: var(--shadow-lg);
+            position: relative;
+            transform: scale(0.95);
+            transition: transform 0.3s ease;
+        }
+        .modal-pro-overlay.active .modal-pro-card { transform: scale(1); }
+        .modal-pro-card h2 {
+            margin-top: 0;
+            color: var(--white);
+            font-size: 1.4rem;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 12px;
+        }
+        .close-modal {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: transparent;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            color: var(--muted);
+            transition: color 0.2s;
+        }
+        .close-modal:hover { color: var(--white); }
+        .pro-form-group { margin-bottom: 15px; text-align: left; }
+        .pro-form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: var(--muted);
+            font-size: 0.9rem;
+        }
+        .pro-form-group input {
+            width: 100%;
+            padding: 10px 12px;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-family: inherit;
+            font-size: 1rem;
+            color: var(--white);
+            box-sizing: border-box;
+            transition: all 0.2s;
+        }
+        .pro-form-group input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
+        }
+        .btn-submit-pro {
+            width: 100%;
+            padding: 12px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-top: 10px;
+        }
+        .btn-submit-pro:hover { background: var(--primary-dark); }
+        .login-error { color: #ef4444; font-size: 0.85rem; margin-top: 10px; display: none; text-align: center; font-weight: 500;}
+
+        /* Modal do Relatório Avançado (Mais largo) */
+        #modalRelatorio .modal-pro-card { max-width: 800px; width: 95%; }
+        
+        .report-header-flex {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 12px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .report-header-flex h2 {
+            margin: 0;
+            border: none;
+            padding: 0;
+        }
+
+        .filter-date-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--border);
+            padding: 6px 12px;
+            border-radius: var(--radius-sm);
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--muted);
+        }
+        .filter-date-group select {
+            background: transparent;
+            border: none;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--white);
+            outline: none;
+            cursor: pointer;
+        }
+
+        /* Seção Superior do Relatório (Métricas e Top do Mês lado a lado) */
+        .report-top-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.3fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        @media (max-width: 768px) {
+            .report-top-grid { grid-template-columns: 1fr; }
+        }
+
+        .metrics-col {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .stat-box {
+            background: rgba(15, 23, 42, 0.5);
+            border: 1px solid var(--border);
+            padding: 12px 15px;
+            border-radius: var(--radius-md);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .stat-box span { font-size: 1.5rem; font-weight: 700; color: var(--primary-hover); }
+        .stat-box label { font-size: 0.75rem; color: var(--muted); font-weight: 600; text-transform: uppercase; }
+
+        /* Card de Destaque: Quem mais acessou no mês */
+        .top-users-card {
+            background: rgba(30, 41, 59, 0.6);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 12px 15px;
+        }
+        .top-users-card h3 {
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--primary-hover);
+            margin: 0 0 10px 0;
+            letter-spacing: 0.5px;
+        }
+        .user-rank-list {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .user-rank-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(15, 23, 42, 0.4);
+            padding: 6px 10px;
+            border-radius: var(--radius-sm);
+            font-size: 0.85rem;
+            border: 1px solid var(--border);
+        }
+        .user-rank-item span:first-child {
+            font-weight: 600;
+            color: var(--white);
+        }
+        .rank-badge {
+            background: rgba(79, 70, 229, 0.25);
+            color: var(--primary-hover);
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 3px 10px;
+            border-radius: 20px;
+            border: 1px solid rgba(79, 70, 229, 0.4);
+        }
+        
+        .table-container {
+            max-height: 250px;
+            overflow-y: auto;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            background: rgba(15, 23, 42, 0.3);
+        }
+        .report-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 0.9rem;
+        }
+        .report-table th { background: rgba(15, 23, 42, 0.9); padding: 10px 15px; color: var(--muted); position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--border);}
+        .report-table td { padding: 10px 15px; border-bottom: 1px solid var(--border); color: var(--text); }
+        .report-table tbody tr:hover { background-color: rgba(255, 255, 255, 0.02); }
+        .badge-count {
+            background: rgba(79, 70, 229, 0.2); color: var(--primary-hover); padding: 3px 10px; border-radius: 20px; font-weight: 600; font-size: 0.8rem; display: inline-block;
+        }
+    </style>
+</head>
+<body>
+
+<!-- MODAL DE BLOQUEIO DE ACESSO -->
+<div id="modalAcesso" class="modal-acesso-overlay">
+    <div class="modal-acesso-card">
+        <h2>Identificação de Acesso</h2>
+        <p>Por favor, informe seu nome para acessar a Central de Ajuda.</p>
+        <form id="formAcesso">
+            <div class="form-group">
+                <input type="text" id="nomeAcessoInput" placeholder="Seu nome completo" required autocomplete="off">
+            </div>
+            <button type="submit" class="btn-acessar">Entrar na Página</button>
+        </form>
+    </div>
+</div>
+
+<!-- MODAL DE LOGIN ADMIN -->
+<div id="modalLoginAdmin" class="modal-pro-overlay">
+    <div class="modal-pro-card">
+        <button class="close-modal" onclick="fecharModalLogin()">✖</button>
+        <h2>⚙️ Acesso Restrito</h2>
+        <form id="formLoginAdmin">
+            <div class="pro-form-group">
+                <label for="adminUsuario">Usuário</label>
+                <input type="text" id="adminUsuario" placeholder="Digite seu usuário" required autocomplete="off">
+            </div>
+            <div class="pro-form-group">
+                <label for="adminSenha">Senha</label>
+                <input type="password" id="adminSenha" placeholder="Digite sua senha" required>
+            </div>
+            <button type="submit" class="btn-submit-pro">Entrar</button>
+            <div id="loginErro" class="login-error">Usuário ou senha incorretos!</div>
+        </form>
+    </div>
+</div>
+
+<!-- MODAL DE RELATÓRIO DE ACESSOS -->
+<div id="modalRelatorio" class="modal-pro-overlay">
+    <div class="modal-pro-card">
+        <button class="close-modal" onclick="fecharModalRelatorio()">✖</button>
+        
+        <div class="report-header-flex">
+            <h2>📊 Relatório de Acessos</h2>
+            <div class="filter-date-group">
+                <span>Período:</span>
+                <select id="filtroData">
+                    <option value="hoje">Hoje</option>
+                    <option value="ontem">Ontem</option>
+                    <option value="7dias">Últimos 7 dias</option>
+                    <option value="mes" selected>Este Mês</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="report-top-grid">
+            <!-- Métricas -->
+            <div class="metrics-col">
+                <div class="stat-box">
+                    <div><label>Visitantes Únicos</label></div>
+                    <span id="statVisitantes">0</span>
+                </div>
+                <div class="stat-box">
+                    <div><label>Total de Acessos</label></div>
+                    <span id="statAcessosTotais">0</span>
+                </div>
+            </div>
+
+            <!-- Quem mais acessou no mês -->
+            <div class="top-users-card">
+                <h3>🏆 Mais Ativos do Mês</h3>
+                <div class="user-rank-list" id="rankingMesList">
+                    <div class="user-rank-item">
+                        <span>1. -</span>
+                        <span class="rank-badge">0 acessos</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table class="report-table">
+                <thead>
+                    <tr>
+                        <th>Nome do Usuário</th>
+                        <th>1º Acesso</th>
+                        <th>Último Acesso</th>
+                        <th>Qtd. Visitas</th>
+                    </tr>
+                </thead>
+                <tbody id="tabelaRelatorioBody">
+                    <!-- Os dados serão injetados aqui via JS -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<header class="topbar"></header>
+ 
+<section class="hero">
+    <div class="hero-content">
+        <div class="titulo-com-logo">
+            <img src="img/logo.png" alt="Logo DEEP" class="logo-titulo">
+            <span class="titulo-texto">Central de <span class="palavra-ajuda">Ajuda</span></span>
+        </div>
+        <p>Base de conhecimento organizada por categorias.</p>
+    </div>
+</section>
+ 
+<main>
+    <div class="search-container">
+        <input type="text" id="search" placeholder="Buscar em todos os tópicos..." autocomplete="off">
+    </div>
+ 
+    <section class="categorias-section">
+        <h2 class="section-title">📚 Categorias da Visita</h2>
+        <div id="categoriasGrid" class="categorias-grid"></div>
+        <div id="statsInfo" class="stats-info"></div>
+    </section>
+
+    <!-- CONTROLES DO ADMINISTRADOR -->
+    <section class="admin-controls">
+        <button id="btnVerAcessos" class="btn-admin btn-acessos" style="display: none;">📊 Dashboard de Acessos</button>
+        <button id="btnAdminLogin" class="btn-admin btn-toggle-admin">⚙️ Acesso Restrito (Admin)</button>
+    </section>
+</main>
+ 
+<footer>
+    <p>&copy; 2026 DEEP. Todos os direitos reservados.</p>
+</footer>
+ 
+<!-- Biblioteca oficial do Supabase -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="app.js?v=1.3"></script>
+</body>
+</html>

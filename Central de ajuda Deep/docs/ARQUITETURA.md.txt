@@ -1,0 +1,21 @@
+# Arquitetura e Fluxo de Funcionamento
+
+## 1. Visão Geral
+
+A aplicação opera como uma *Single Page Application* (SPA) estática, armazenando o conteúdo da base de conhecimento em memória (`categoriasConfig` no `app.js`) para garantir carregamento instantâneo e funcionamento offline da consulta, enquanto utiliza o **Supabase** como backend-as-a-service para telemetria de uso.
+
+## 2. Fluxo de Execução
+
+1. **Inicialização (`init`):**
+   - Exibe o modal obrigatório `#modalAcesso` solicitando o nome do colaborador.
+   - Renderiza os cards de categorias (`renderCategorias`) restaurando o estado expandido/recolhido salvo no `localStorage`.
+   - Atualiza o contador total de categorias e tópicos (`updateStats`).
+2. **Registro de Acesso (`registrarAcesso`):**
+   - Atualiza o contador diário no `localStorage` (`acessos_YYYY-MM-DD`).
+   - Consulta a tabela `acessos` no Supabase filtrando por `nome_usuario` e `data_acesso`. Se já existir registro no dia, incrementa `quantidade` e atualiza `ultima_hora`; caso contrário, insere uma nova linha.
+3. **Motor de Busca (`handleSearch` / `performSearch`):**
+   - Aplica *debounce* de 300 ms sobre o evento `input` do campo `#search`.
+   - Filtra categorias, subcategorias e tópicos simultaneamente, expandindo automaticamente os blocos correspondentes e destacando os termos encontrados.
+4. **Módulo Administrativo (`processarLoginAdmin` / `carregarRelatorioAcessos`):**
+   - Valida credenciais para liberar o botão **Dashboard de Acessos**.
+   - Consulta intervalos de datas no Supabase (`hoje`, `ontem`, `7dias`, `mes`), consolida visitantes únicos, soma acessos totais e calcula o Top 3 usuários mais ativos no mês corrente.
